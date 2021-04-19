@@ -1,6 +1,6 @@
 require_relative './lib/local_model'
 
-LocalModel.config{}
+LocalModel.config
 
 class Dog < LocalModel::CSV
 

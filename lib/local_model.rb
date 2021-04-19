@@ -19,7 +19,9 @@ module LocalModel
 
   def self.config(&block)
     configuration = Configuration.new
-    yield(configuration)
+    if block_given?
+      yield(configuration)
+    end
     @@path = configuration.path
     Dir.mkdir(configuration.path) unless Dir.exist?(configuration.path)
     if configuration.cleanup_on_start
