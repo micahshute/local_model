@@ -1,5 +1,5 @@
 require_relative './lib/local_model'
-
+require 'pry'
 LocalModel.config
 
 class Dog < LocalModel::CSV
@@ -11,7 +11,6 @@ class Dog < LocalModel::CSV
   end
 
   belongs_to :user
-
 
 end
 
@@ -26,3 +25,7 @@ class User < LocalModel::CSV
   has_many :dogs
 
 end
+
+
+
+binding.pry

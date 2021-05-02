@@ -1,5 +1,5 @@
 require 'pry'
-require "local_model/version"
+require_relative "./local_model/version"
 require 'csv'
 require 'require_all'
 require_all 'lib/local_model/adapters'
