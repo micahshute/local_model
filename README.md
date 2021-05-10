@@ -82,6 +82,7 @@ As of now, supports:
 
 Does not support yet (notably): 
 - .build, .update, validations, #<< to add many relationships 
+- object equivalence if gotten from source twice
 
 ## Development
 
