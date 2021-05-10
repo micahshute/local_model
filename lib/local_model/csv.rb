@@ -52,6 +52,10 @@ class LocalModel::CSV < LocalModel::Model
     all_instances
   end
 
+  def self.destroy_all
+    self.all.each{ |obj| obj.destroy }
+  end
+
   def self.where(**args)
     all_records do |row|
       found = true
@@ -116,6 +120,10 @@ class LocalModel::CSV < LocalModel::Model
 
   def saved?
     !self.id.nil?
+  end
+
+  def destroy
+    self.class.delete_row({id: self.id})
   end
 
 end

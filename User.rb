@@ -1,6 +1,8 @@
 require_relative './lib/local_model'
 require 'pry'
-LocalModel.config
+LocalModel.config do |c|
+  c.path = '/home/micah/dev/tmp'
+end
 
 class Dog < LocalModel::CSV
 
