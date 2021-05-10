@@ -22,7 +22,66 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Create your schema:
+
+```rb
+# Some config file
+
+LocalModel.config |c|
+    c.path = "/some/path/you_want/to_store/the_csv_files"
+end
+```
+
+```rb
+# User.rb
+
+class User < LocalModel::CSV
+
+    schema do |t|
+        t.string :name
+        t.integer :age
+        t.string :password
+    end 
+
+    has_many :dogs
+
+end
+```
+```rb
+# Dog.rb
+
+class Dog < LocalModel::CSV
+
+    schema do |t|
+        t.string :name
+        t.integer :age
+        t.integer :user_id
+    end
+
+    belongs_to :user
+end
+
+```
+
+...then
+
+```rb
+
+u = User.create(name: "Cyrus Harding", age: 45, password: "LincolnIsland")
+d = Dog.create(name: "Top", age: 3, user: u)
+
+u.dogs # => [#<Dog:0x00005568e92b3f48 @age=3, @id=1, @name="Top">]
+d.user # => #<User:0x00005568e92b3f48 @age=45, @id=1, @name="Cyrus Harding", @password="LincolnIsland">
+
+u == User.first # true
+Dog.where(user: u).first == d # true
+
+```
+As of now, supports:
+- #destroy, .find, .create, .new, .where, .first, .second, .last, relationships, updating,
+
+Does not support yet (notably): 
+- .build, .update, validations
 
 ## Development
 
