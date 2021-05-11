@@ -8,7 +8,8 @@ class LocalModel::Model
   def self.belongs_to(association)
     define_method association do
       id = self.send("#{association}_id")
-      association_class_name = LocalModel::Functions.snake_to_camel(association).capitalize
+      association_class_name = LocalModel::Functions.snake_to_camel(association)
+      association_class_name[0] = association_class_name[0].upcase
       association_class = Object.const_get(association_class_name)
       association_class.find(id)
     end
@@ -18,23 +19,57 @@ class LocalModel::Model
     end
   end
 
-  def self.has_many(association)
+  def self.has_many(association, through: nil, class_name: nil, foreign_key: nil)
+    if class_name.nil?
+      association_classname = get_classname_from_association(association)
+    else
+      association_classname = class_name
+    end
+
+    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(self.to_s)}_id"
+    belongs_to_id_sym = current_class_id_methodname.to_sym
+
+    if through.nil?
+      define_method association do
+        association_class = Object.const_get(association_classname)
+        association_class.where(belongs_to_id_sym => self.id)
+      end
+    else
+      through_classname = get_classname_from_association(through)
+      define_method association do 
+        through_class = Object.const_get(through_classname)
+        through_class.where(belongs_to_id_sym => self.id).map{|obj| obj.send(LocalModel::Functions.singularize(association))}
+      end
+    end
+  end
+
+  def self.has_one(association, class_name: nil, foreign_key: nil)
+    if class_name.nil?
+      association_classname = LocalModel::Functions.snake_to_camel(association)
+      association_classname[0] = association_classname[0].upcase
+    else
+      association_classname = class_name
+    end
+    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(self.to_s)}_id"
+    belongs_to_id_sym = current_class_id_methodname.to_sym
+
+    define_method association do 
+      association_class = Object.const_get(association_classname)
+      association_class.where(belongs_to_id_sym => self.id).first
+    end
+  end
+
+  def self.get_classname_from_association(association)
     association_portions = association.to_s.split('_')
     association_portions_last = association_portions.last
     singular_association_last = LocalModel::Functions.singularize(association_portions_last)
     singularized_association = association_portions[0...-1] + [singular_association_last]
     singularized_snakecase = singularized_association.join('_')
-    association_classname = LocalModel::Functions.snake_to_camel(singularized_snakecase).capitalize
-    current_class_id_methodname = "#{LocalModel::Functions.camel_to_snake(self.to_s)}_id"
-    belongs_to_id_sym = current_class_id_methodname.to_sym
-
-    define_method association do
-      association_class = Object.const_get(association_classname)
-      association_class.where(belongs_to_id_sym => self.id)
-    end
-
-
+    classname = LocalModel::Functions.snake_to_camel(singularized_snakecase)
+    classname[0] = classname[0].upcase
+    classname
   end
+  private_class_method :get_classname_from_association
 
 
   def self.storage_path

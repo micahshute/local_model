@@ -23,7 +23,44 @@ RSpec.describe LocalModel::CSV do
             end
 
             belongs_to :user
+            has_many :dog_toys
+            has_many :toys, through: :dog_toys
+            has_one :collar
         end
+
+        class Toy < LocalModel::CSV
+            schema do |t|
+                t.string :name
+            end
+
+            has_many :dog_toys
+            has_many :dogs, through: :dog_toys
+        end
+
+        class DogToy < LocalModel::CSV
+            schema do |t|
+                t.integer :dog_id
+                t.integer :toy_id
+            end
+
+            belongs_to :dog
+            belongs_to :toy
+        end
+
+        class Collar < LocalModel::CSV
+            schema do |t|
+                t.string :color
+                t.integer :dog_id
+            end
+            belongs_to :dog
+        end
+    end
+
+    before :each do 
+        Dog.destroy_all
+        User.destroy_all
+        Toy.destroy_all
+        DogToy.destroy_all
     end
 
     after(:all) do 
@@ -103,9 +140,35 @@ RSpec.describe LocalModel::CSV do
             Dog.create(name: "Perdita", age: 4, user: roger)
         end
 
-        it "can manage relationships" do
+        let!(:bone) do 
+            Toy.create(name: "bone")
+        end
+
+        let!(:pongos_collar) do 
+            Collar.create(color: "blue", dog: pongo)
+        end
+
+        let!(:dog_bones) do 
+            toy = Toy.first
+            pongo_bone = DogToy.create(dog: pongo, toy: toy)
+            perdita_bone = DogToy.create(dog: perdita, toy: toy)
+        end
+
+        it "can manage has_many relationships" do
             expect(roger.dogs.length).to eq 2
             expect(perdita.user.id).to eq roger.id
+        end
+
+        it "can manage has_many through relationships" do
+            expect(pongo.toys.length).to eq 1
+            expect(perdita.toys.first.name).to eq "bone"
+            expect(pongo.dog_toys.length).to eq 1
+            expect(Toy.first.dogs.length).to eq 2
+        end
+
+        it "can manage has_one relationship" do 
+            expect(pongo.collar.color).to eq ("blue")
+            expect(Collar.first.dog.name).to eq("Pongo")
         end
     end
 end
