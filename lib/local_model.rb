@@ -1,7 +1,6 @@
 require 'pry'
 require_relative "./local_model/version"
 require 'csv'
-require 'require_all'
 require_relative './local_model/adapters/boolean_adapter'
 require_relative './local_model/adapters/datetime_adapter'
 require_relative './local_model/adapters/float_adapter'
