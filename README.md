@@ -84,6 +84,36 @@ Does not support yet (notably):
 - .build, .update, validations, #<< to add many relationships 
 - object equivalence if gotten from source twice
 
+
+### Namespace Methods
+
+```rb
+
+LocalModel.config do |c|
+    c.path = "/home/me/data/"
+    c.cleanup_on_start = true # delete ALL files in path on startup 
+    c.namespace = "InMemory" # Expect ALL LocalModels to be namespaced via this string
+end
+
+```
+
+```rb
+# in_memory/pokemon.rb
+
+class InMemory::Pokemon < LocalModel::CSV
+
+    schema do |t|
+        t.string :name
+        t.string :nickname
+        t.integer :hp
+        t.string :species
+    end
+
+end
+
+
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
