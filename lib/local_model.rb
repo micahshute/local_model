@@ -45,7 +45,7 @@ module LocalModel
     @@namespace = configuration.namespace
     Dir.mkdir(configuration.path) unless Dir.exist?(configuration.path)
     if configuration.cleanup_on_start
-      Dir.foreach do |f|
+      Dir.foreach(configuration.path) do |f|
         fn = File.join(configuration.path, f)
         File.delete(fn) if f != '.' && f != '..'
       end
