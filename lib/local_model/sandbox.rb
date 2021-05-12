@@ -1,0 +1,4 @@
+module LocalModel::Sbx
+
+
+end

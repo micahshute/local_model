@@ -6,11 +6,13 @@ class LocalModel::Model
   end
 
   def self.belongs_to(association)
+    association_class_name = LocalModel::Functions.snake_to_camel(association)
+    association_class_name[0] = association_class_name[0].upcase
+    association_class_name = namespace_classname(association_class_name)
+    association_class = Object.const_get(association_class_name)
+
     define_method association do
       id = self.send("#{association}_id")
-      association_class_name = LocalModel::Functions.snake_to_camel(association)
-      association_class_name[0] = association_class_name[0].upcase
-      association_class = Object.const_get(association_class_name)
       association_class.find(id)
     end
 
@@ -21,12 +23,12 @@ class LocalModel::Model
 
   def self.has_many(association, through: nil, class_name: nil, foreign_key: nil)
     if class_name.nil?
-      association_classname = get_classname_from_association(association)
+      association_classname = namespace_classname(get_classname_from_association(association))
     else
-      association_classname = class_name
+      association_classname = namespace_classname(class_name)
     end
 
-    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(self.to_s)}_id"
+    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
     belongs_to_id_sym = current_class_id_methodname.to_sym
 
     if through.nil?
@@ -35,7 +37,7 @@ class LocalModel::Model
         association_class.where(belongs_to_id_sym => self.id)
       end
     else
-      through_classname = get_classname_from_association(through)
+      through_classname = namespace_classname(get_classname_from_association(through))
       define_method association do 
         through_class = Object.const_get(through_classname)
         through_class.where(belongs_to_id_sym => self.id).map{|obj| obj.send(LocalModel::Functions.singularize(association))}
@@ -47,10 +49,11 @@ class LocalModel::Model
     if class_name.nil?
       association_classname = LocalModel::Functions.snake_to_camel(association)
       association_classname[0] = association_classname[0].upcase
+      association_classname = namespace_classname(association_classname)
     else
       association_classname = class_name
     end
-    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(self.to_s)}_id"
+    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
     belongs_to_id_sym = current_class_id_methodname.to_sym
 
     define_method association do 
@@ -71,6 +74,19 @@ class LocalModel::Model
   end
   private_class_method :get_classname_from_association
 
+  def self.denamespace_classname(classname)
+    return classname.to_s.split("::").last
+  end
+  private_class_method :denamespace_classname
+
+  def self.namespace_classname(classname)
+    if LocalModel.namespaced?
+      "#{LocalModel.namespace}::#{classname}"
+    else
+      classname
+    end
+  end
+  private_class_method :namespace_classname
 
   def self.storage_path
     slash = LocalModel.path == '/' ? '' : '/'

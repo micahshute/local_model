@@ -1,6 +1,6 @@
-require 'pry'
 require_relative "./local_model/version"
 require 'csv'
+require_relative './local_model/sandbox'
 require_relative './local_model/adapters/boolean_adapter'
 require_relative './local_model/adapters/datetime_adapter'
 require_relative './local_model/adapters/float_adapter'
@@ -16,6 +16,21 @@ module LocalModel
   class Error < StandardError; end
 
   @@path = "#{Dir.pwd}/tmp"
+  @@namespace = nil
+
+  def self.namespaced?
+    !!@@namespace
+  end
+
+  def self.namespace 
+    if @@namespace.nil? 
+      nil
+    elsif @@namespace == :default || @@namespace == "default"
+      "LocalModel::Sbx"
+    else
+      @@namespace
+    end
+  end
 
   def self.path
     @@path
@@ -27,6 +42,7 @@ module LocalModel
       yield(configuration)
     end
     @@path = configuration.path
+    @@namespace = configuration.namespace
     Dir.mkdir(configuration.path) unless Dir.exist?(configuration.path)
     if configuration.cleanup_on_start
       Dir.foreach do |f|
@@ -38,11 +54,12 @@ module LocalModel
 
   class Configuration
 
-    attr_accessor :path, :cleanup_on_start
+    attr_accessor :path, :cleanup_on_start, :namespace
 
     def initialize
       @path = "#{Dir.pwd}/tmp"
       @cleanup_on_start = false
+      @namespace = nil
     end
   end
 end
