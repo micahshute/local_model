@@ -13,7 +13,6 @@ class LocalModel::Model
     else
       association_class_name = namespace_classname(class_name)
     end
-    association_class = Object.const_get(association_class_name)
 
     if foreign_key.nil?
       keyname = "#{association}_id"
@@ -22,6 +21,7 @@ class LocalModel::Model
     end
 
     define_method association do
+      association_class = Object.const_get(association_class_name)
       id = self.send(keyname)
       association_class.find(id)
     end
@@ -38,37 +38,47 @@ class LocalModel::Model
       association_classname = namespace_classname(class_name)
     end
 
-    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
-    belongs_to_id_sym = current_class_id_methodname.to_sym
 
     if through.nil?
+      current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
+      belongs_to_id_sym = current_class_id_methodname.to_sym
       define_method association do
         association_class = Object.const_get(association_classname)
         association_class.where(belongs_to_id_sym => self.id)
       end
     else
-      through_classname = namespace_classname(get_classname_from_association(through))
+      current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(LocalModel::Functions.singularize(association))}_id"
+      belongs_to_id_sym = current_class_id_methodname.to_sym
       define_method association do 
-        through_class = Object.const_get(through_classname)
-        through_class.where(belongs_to_id_sym => self.id).map{|obj| obj.send(LocalModel::Functions.singularize(association))}
+        association_class = Object.const_get(association_classname)
+        self.send(through).map{|through_obj| association_class.find(through_obj.send(belongs_to_id_sym))}
       end
     end
   end
 
-  def self.has_one(association, class_name: nil, foreign_key: nil)
+  def self.has_one(association, through: nil, class_name: nil, foreign_key: nil)
     if class_name.nil?
       association_classname = LocalModel::Functions.snake_to_camel(association)
       association_classname[0] = association_classname[0].upcase
       association_classname = namespace_classname(association_classname)
     else
-      association_classname = class_name
+      association_classname = namespace_classname(class_name)
     end
-    current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
-    belongs_to_id_sym = current_class_id_methodname.to_sym
 
-    define_method association do 
-      association_class = Object.const_get(association_classname)
-      association_class.where(belongs_to_id_sym => self.id).first
+    if through.nil?
+      current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
+      belongs_to_id_sym = current_class_id_methodname.to_sym
+      define_method association do 
+        association_class = Object.const_get(association_classname)
+        association_class.where(belongs_to_id_sym => self.id).first
+      end
+    else
+      current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(association)}_id"
+      belongs_to_id_sym = current_class_id_methodname.to_sym
+      define_method association do 
+        association_class = Object.const_get(association_classname)
+        association_class.where(id: self.send(through)&.send(belongs_to_id_sym)).first
+      end
     end
   end
 

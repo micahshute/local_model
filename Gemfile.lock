@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    local_model (0.1.4)
+    local_model (0.1.5)
 
 GEM
   remote: https://rubygems.org/

@@ -27,7 +27,12 @@ RSpec.describe LocalModel::CSV do
             has_many :dog_toys
             has_many :toys, through: :dog_toys
             has_one :collar
+            has_one :dog_follower, foreign_key: :following_id, class_name: :DogFollower
+            has_one :dog_following, foreign_key: :follower_id, class_name: :DogFollower
+            has_one :follower, through: :dog_follower, class_name: :Dog, foreign_key: :follower_id
+            has_one :following, through: :dog_following, class_name: :Dog, foreign_key: :following_id
         end
+
 
         class LocalModel::Sbx::Toy < LocalModel::CSV
             schema do |t|
@@ -48,6 +53,16 @@ RSpec.describe LocalModel::CSV do
             belongs_to :toy
         end
 
+        class LocalModel::Sbx::DogFollower < LocalModel::CSV
+            schema do |t|
+                t.integer :follower_id
+                t.integer :following_id
+            end
+
+            belongs_to :follower, class_name: :Dog, foreign_key: :follower_id
+            belongs_to :following, class_name: :Dog, foreign_key: :following_id
+        end
+
         class LocalModel::Sbx::Collar < LocalModel::CSV
             schema do |t|
                 t.string :color
@@ -62,6 +77,8 @@ RSpec.describe LocalModel::CSV do
         LocalModel::Sbx::User.destroy_all
         LocalModel::Sbx::Toy.destroy_all
         LocalModel::Sbx::DogToy.destroy_all
+        LocalModel::Sbx::DogFollower.destroy_all
+        LocalModel::Sbx::Collar.destroy_all
     end
 
     after(:all) do 
@@ -149,6 +166,10 @@ RSpec.describe LocalModel::CSV do
             LocalModel::Sbx::Collar.create(color: "blue", dog: pongo)
         end
 
+        let!(:following) do 
+            LocalModel::Sbx::DogFollower.create(follower: pongo, following: perdita)
+        end
+
         let!(:dog_bones) do 
             toy = LocalModel::Sbx::Toy.first
             pongo_bone = LocalModel::Sbx::DogToy.create(dog: pongo, toy: toy)
@@ -170,6 +191,13 @@ RSpec.describe LocalModel::CSV do
         it "can manage has_one relationship" do 
             expect(pongo.collar.color).to eq ("blue")
             expect(LocalModel::Sbx::Collar.first.dog.name).to eq("Pongo")
+        end
+
+        it "can manage a complex has_one relationship" do 
+            expect(pongo.following.name).to eq('Perdita')
+            expect(perdita.follower.name).to eq('Pongo')
+            expect(pongo.follower).to be nil
+            expect(perdita.following).to be nil
         end
     end
 end

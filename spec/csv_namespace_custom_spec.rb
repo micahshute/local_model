@@ -31,6 +31,21 @@ RSpec.describe LocalModel::CSV do
             has_many :toys, through: :dog_toys
             has_one :collar
             belongs_to :bestie, foreign_key: :friend_id, class_name: :Dog
+            has_many :dog_followers, foreign_key: :following_id, class_name: :DogFollower
+            has_many :dog_followings, foreign_key: :follower_id, class_name: :DogFollower
+            has_many :followers, through: :dog_followers, foreign_key: :follower_id, class_name: :Dog
+            has_many :followings, through: :dog_followings, foreign_key: :following_id, class_name: :Dog
+
+        end
+
+        class InMemory::DogFollower < LocalModel::CSV
+            schema do |t|
+                t.integer :following_id
+                t.integer :follower_id
+            end
+
+            belongs_to :follower, foreign_key: :follower_id, class_name: :Dog
+            belongs_to :following, foreign_key: :following_id, class_name: :Dog
         end
 
         class InMemory::Toy < LocalModel::CSV
@@ -66,6 +81,8 @@ RSpec.describe LocalModel::CSV do
         InMemory::User.destroy_all
         InMemory::Toy.destroy_all
         InMemory::DogToy.destroy_all
+        InMemory::Collar.destroy_all
+        InMemory::DogFollower.destroy_all
     end
 
     after(:all) do 
@@ -159,6 +176,10 @@ RSpec.describe LocalModel::CSV do
             perdita_bone = InMemory::DogToy.create(dog: perdita, toy: toy)
         end
 
+        let!(:following) do 
+            InMemory::DogFollower.create(following: pongo, follower: perdita)
+        end
+
         it "can manage has_many relationships" do
             expect(roger.dogs.length).to eq 2
             expect(perdita.user.id).to eq roger.id
@@ -178,7 +199,22 @@ RSpec.describe LocalModel::CSV do
 
         it "can do foreign_key and class_name in belongs_to" do 
             pongo.bestie = perdita
-            expect(pongo.friend_id).to eq(perdita.id)
+            pongo.save
+            test_pongo = InMemory::Dog.find_by(name: 'Pongo')
+            expect(test_pongo.bestie.id).to eq(perdita.id)
+        end
+
+        it "can do complex many to many" do 
+            pongo_followers = pongo.followers
+            pongo_followings = pongo.followings
+            perdita_followers = perdita.followers
+            perdita_followings = perdita.followings
+            expect(pongo_followers.length).to eq 1
+            expect(pongo_followers.first.name).to eq 'Perdita'
+            expect(pongo_followings.length).to eq 0
+            expect(perdita_followers.length).to eq 0
+            expect(perdita.followings.length).to eq 1
+            expect(perdita.followings.first.name).to eq 'Pongo'
         end
     end
 end
