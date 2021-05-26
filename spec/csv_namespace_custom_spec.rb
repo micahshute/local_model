@@ -23,12 +23,14 @@ RSpec.describe LocalModel::CSV do
                 t.string :name
                 t.integer :user_id
                 t.integer :age
+                t.integer :friend_id
             end
 
             belongs_to :user
             has_many :dog_toys
             has_many :toys, through: :dog_toys
             has_one :collar
+            belongs_to :bestie, foreign_key: :friend_id, class_name: :Dog
         end
 
         class InMemory::Toy < LocalModel::CSV
@@ -172,6 +174,11 @@ RSpec.describe LocalModel::CSV do
         it "can manage has_one relationship" do 
             expect(pongo.collar.color).to eq ("blue")
             expect(InMemory::Collar.first.dog.name).to eq("Pongo")
+        end
+
+        it "can do foreign_key and class_name in belongs_to" do 
+            pongo.bestie = perdita
+            expect(pongo.friend_id).to eq(perdita.id)
         end
     end
 end

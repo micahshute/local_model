@@ -5,19 +5,29 @@ class LocalModel::Model
     # yield(SchemaBuilder.new(self))
   end
 
-  def self.belongs_to(association)
-    association_class_name = LocalModel::Functions.snake_to_camel(association)
-    association_class_name[0] = association_class_name[0].upcase
-    association_class_name = namespace_classname(association_class_name)
+  def self.belongs_to(association, class_name: nil, foreign_key: nil)
+    if class_name.nil?
+      association_class_name = LocalModel::Functions.snake_to_camel(association)
+      association_class_name[0] = association_class_name[0].upcase
+      association_class_name = namespace_classname(association_class_name)
+    else
+      association_class_name = namespace_classname(class_name)
+    end
     association_class = Object.const_get(association_class_name)
 
+    if foreign_key.nil?
+      keyname = "#{association}_id"
+    else
+      keyname = foreign_key
+    end
+
     define_method association do
-      id = self.send("#{association}_id")
+      id = self.send(keyname)
       association_class.find(id)
     end
 
     define_method "#{association}=" do |association_obj|
-      self.send("#{association}_id=", association_obj.id)
+      self.send("#{keyname}=", association_obj.id)
     end
   end
 
