@@ -20,7 +20,11 @@ class PluralizedWords
     "beliefs" => "belief",
     "chefs" => "chef",
     "chiefs" => "chief",
-    "gasses" => "gas"
+    "gasses" => "gas",
+    "moves" => "move",
+    "groves" => "grove",
+    "stoves" => "stove",
+    "beliefs" => "belief"
   }
 
    IRREGULAR_PLURALIZED_WORDS = {
@@ -43,7 +47,7 @@ class PluralizedWords
     "belief" => "beliefs",
     "chef" => "chefs",
     "chief" => "chiefs",
-    "gas" => "gasses"
+    "gas" => "gasses",
   }
 
 end
