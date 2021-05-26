@@ -1,4 +1,4 @@
-class PluralizedWords
+class LocalModel::PluralizedWords
 
   IRREGULAR_SINGULARIZED_WORDS = {
     "children" => "child",

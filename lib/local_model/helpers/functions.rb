@@ -12,7 +12,7 @@ class LocalModel::Functions
 
   def self.singularize(word)
     word = word.to_s
-    return PluralizedWords::IRREGULAR_SINGULARIZED_WORDS[word] if PluralizedWords::IRREGULAR_PLURALIZED_WORDS[word]
+    return LocalModel::PluralizedWords::IRREGULAR_SINGULARIZED_WORDS[word] if LocalModel::PluralizedWords::IRREGULAR_SINGULARIZED_WORDS[word]
     if word[-1] == "i"
       "#{word[0...-1]}us"
     elsif word[-1] == "a"
@@ -35,7 +35,7 @@ class LocalModel::Functions
 
   def self.pluralize(word)
     word = word.to_s
-    return PluralizedWords::IRREGULAR_PLURALIZED_WORDS[word] if PluralizedWords::IRREGULAR_PLURALIZED_WORDS[word]
+    return LocalModel::PluralizedWords::IRREGULAR_PLURALIZED_WORDS[word] if LocalModel::PluralizedWords::IRREGULAR_PLURALIZED_WORDS[word]
     if word[-2..-1] == "us"
       "#{word[0...-2]}i"
     elsif word[-2..-1] == "on"
