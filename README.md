@@ -81,7 +81,7 @@ As of now, supports:
 - #destroy, .find, .create, .new, .where, .first, .second, .last, relationships, updating,
 
 Does not support yet (notably): 
-- .build, .update, validations, #<< to add many relationships 
+- .build, .update, validations
 - object equivalence if gotten from source twice
 
 
