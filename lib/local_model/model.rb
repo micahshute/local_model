@@ -27,7 +27,7 @@ class LocalModel::Model
     end
 
     define_method "#{association}=" do |association_obj|
-      self.send("#{keyname}=", association_obj.id)
+      self.send("#{keyname}=", association_obj&.id)
     end
   end
 
@@ -38,20 +38,39 @@ class LocalModel::Model
       association_classname = namespace_classname(class_name)
     end
 
-
     if through.nil?
       current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(denamespace_classname(self))}_id"
       belongs_to_id_sym = current_class_id_methodname.to_sym
+      add_to_collection = Proc.new do |arg, model|
+        arg.send("#{belongs_to_id_sym}=", model.id)
+      end
       define_method association do
         association_class = Object.const_get(association_classname)
-        association_class.where(belongs_to_id_sym => self.id)
+        LocalModel::Collection.create_from(
+          array: association_class.where(belongs_to_id_sym => self.id),
+          for_model: self,
+          for_collection_class: association_class,
+          add_to_collection_proc: add_to_collection
+        )
       end
     else
       current_class_id_methodname = foreign_key || "#{LocalModel::Functions.camel_to_snake(LocalModel::Functions.singularize(association))}_id"
       belongs_to_id_sym = current_class_id_methodname.to_sym
+      add_to_collection = Proc.new do |arg, model|
+        through_collection = model.send(through)
+        through_classname = through_collection.collection_class
+        new_join = through_classname.new
+        new_join.send("#{belongs_to_id_sym}=", arg.id)
+        through_collection << new_join
+      end
       define_method association do 
         association_class = Object.const_get(association_classname)
-        self.send(through).map{|through_obj| association_class.find(through_obj.send(belongs_to_id_sym))}
+        LocalModel::Collection.create_from(
+          array: self.send(through).map{|through_obj| association_class.find(through_obj.send(belongs_to_id_sym))},
+          for_model: self,
+          for_collection_class: association_class,
+          add_to_collection_proc: add_to_collection
+        )
       end
     end
   end

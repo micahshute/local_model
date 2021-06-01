@@ -149,6 +149,17 @@ RSpec.describe LocalModel::CSV do
         end
     end
 
+    describe "edge cases" do 
+        let(:griffin){ InMemory::Dog.create }
+
+        it "can accept nil as a belongs_to ref" do 
+            expect do 
+                griffin.user = nil
+                griffin.save
+            end.to_not raise_error
+        end
+    end
+
     describe "relationships" do 
         let!(:roger) do 
             InMemory::User.create(name: "Roger", age: 38)
@@ -176,6 +187,10 @@ RSpec.describe LocalModel::CSV do
             perdita_bone = InMemory::DogToy.create(dog: perdita, toy: toy)
         end
 
+        let!(:puppy) do 
+            InMemory::Dog.create(name: "Puppy", age: 0)
+        end
+
         let!(:following) do 
             InMemory::DogFollower.create(following: pongo, follower: perdita)
         end
@@ -183,6 +198,8 @@ RSpec.describe LocalModel::CSV do
         it "can manage has_many relationships" do
             expect(roger.dogs.length).to eq 2
             expect(perdita.user.id).to eq roger.id
+            roger.dogs << puppy
+            expect(roger.dogs.length).to eq 3
         end
 
         it "can manage has_many through relationships" do
@@ -215,6 +232,9 @@ RSpec.describe LocalModel::CSV do
             expect(perdita_followers.length).to eq 0
             expect(perdita.followings.length).to eq 1
             expect(perdita.followings.first.name).to eq 'Pongo'
+            perdita_followers << pongo
+            expect(perdita_followers.length).to eq 1
+            expect(perdita.followers.first.name).to eq 'Pongo'
         end
     end
 end
