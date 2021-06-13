@@ -1,5 +1,7 @@
 require_relative "./local_model/version"
 require 'csv'
+require_relative './local_model/errors/record_invalid'
+require_relative './local_model/errors/record_not_found'
 require_relative './local_model/sandbox'
 require_relative './local_model/collection'
 require_relative './local_model/adapters/boolean_adapter'

@@ -100,6 +100,13 @@ RSpec.describe LocalModel::CSV do
         end
     end
 
+    describe '.count' do 
+        before { 50.times { |i| InMemory::User.create(name: "person#{i}", age: 25) } }
+        it 'returns the total number of objects' do 
+            expect(InMemory::User.count).to eq 50
+        end
+    end
+
     describe ".create" do 
         let(:user1) { InMemory::User.create(name: "A Person", age: 24) }
         it "creates an object and persists it" do 
@@ -147,6 +154,19 @@ RSpec.describe LocalModel::CSV do
             dogs = InMemory::Dog.where(user_id: shaggy.id)
             expect(dogs.length).to eq(2)
         end
+    end
+
+    describe '.reload' do 
+        let!(:griffin){ InMemory::Dog.create(name: "Griffin", age: 3) }
+
+        it 'gets the correct object from the csv' do 
+            griffin.age = 4
+            expect(griffin.age).to eq 4
+            expect(griffin.reload.age).to eq 3
+            griffin.save
+            expect(griffin.reload.age).to eq 4
+        end
+
     end
 
     describe "edge cases" do 

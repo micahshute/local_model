@@ -22,7 +22,7 @@ class LocalModel::CSV < LocalModel::Model
     end
 
     self.define_singleton_method :columns do
-        cols
+      cols
     end
 
     schema_data = cols.each_with_index.reduce({}) do |mem, (key,i)|
@@ -50,6 +50,12 @@ class LocalModel::CSV < LocalModel::Model
       all_instances << new_from_record(row)
     end
     all_instances
+  end
+
+  def self.count
+    total = 0
+    self.each_record{ total += 1 }
+    total
   end
 
   def self.destroy_all
@@ -105,9 +111,24 @@ class LocalModel::CSV < LocalModel::Model
     return self.find_by(id: id)
   end
 
+  def self.find!(id)
+    found_record = find(id)
+    if !found_record
+      raise LocalModel::RecordNotFound.new
+    else
+      found_record
+    end
+  end
+
   def self.create(**args)
     inst = new(**args)
     inst.save
+    inst
+  end
+
+  def self.create!(**args)
+    inst = new(**args)
+    inst.save!
     inst
   end
 
@@ -120,6 +141,11 @@ class LocalModel::CSV < LocalModel::Model
 
   def saved?
     !self.id.nil?
+  end
+  
+  def reload
+    raise LocalModel::RecordNotFound if !self.id
+    self.class.find!(self.id)
   end
 
   def destroy

@@ -218,6 +218,12 @@ module CSVInteractable
       end
     end
 
+    def save!
+      if !save
+        raise LocalModel::RecordInvalid
+      end
+    end
+
   end
 
 end
