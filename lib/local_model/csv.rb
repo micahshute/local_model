@@ -59,7 +59,7 @@ class LocalModel::CSV < LocalModel::Model
   end
 
   def self.destroy_all
-    self.all.each{ |obj| obj.destroy }
+    delete_all_rows
   end
 
   def self.where(**args)
