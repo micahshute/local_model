@@ -21,8 +21,21 @@ class LocalModel::Collection < Array
         arg.save && self.model.save
     end
 
-    def build(arg)
-        self.push(arg)
+    def build(**args)
+        self.push(collection_class.create(**args))
+    end
+
+    def where(**args)
+        self.filter do |el|
+            found = true
+            args.each do |k,v|
+                if el.send(k.to_s) != v
+                    found = false
+                    break
+                end
+            end
+            found
+        end
     end
 
 end
