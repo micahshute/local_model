@@ -18,15 +18,15 @@ module CSVInteractable
       rand_val = @@rand.rand(1000000)
       f = File.new("#{self.storage_path}-#{rand_val}.prep", 'w')
       f.close
-      r = @@rand.rand / 10.0
-      sleep(r)
+      # r = @@rand.rand / 10.0
+      # sleep(r)
 
       if File.exist?("#{self.storage_path}.bak.csv") || Dir["#{self.storage_path}-*.prep"].length > 1
         File.delete("#{self.storage_path}-#{rand_val}.prep")
-        if @@rand.rand(2) == 1
-          sleep(0.5)
+        if @@rand.rand(5) != 1
+          sleep(@@rand.rand / 10.0)
         end
-        mutate_csv
+        mutate_csv(option, block)
         return
       else
         File.delete("#{self.storage_path}-#{rand_val}.prep")
@@ -198,6 +198,17 @@ module CSVInteractable
         File.delete("#{self.storage_path}.bak.csv")
         false
       end
+    end
+
+    def delete_all_rows
+      begin
+        self.mutate_csv(:mutate) {}
+        true
+      rescue
+        File.delete("#{self.storage_path}.bak.csv")
+        false
+      end
+
     end
 
   end
