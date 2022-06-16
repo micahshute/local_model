@@ -39,6 +39,13 @@ module LocalModel
     @@path
   end
 
+  def self.db_drop
+    Dir.foreach(@@path) do |f|
+      fn = File.join(@@path, f)
+      File.delete(fn) if f != '.' && f != '..'
+    end
+  end
+
   def self.config(&block)
     configuration = Configuration.new
     if block_given?
@@ -48,10 +55,7 @@ module LocalModel
     @@namespace = configuration.namespace
     Dir.mkdir(configuration.path) unless Dir.exist?(configuration.path)
     if configuration.cleanup_on_start
-      Dir.foreach(configuration.path) do |f|
-        fn = File.join(configuration.path, f)
-        File.delete(fn) if f != '.' && f != '..'
-      end
+      db_drop
     end
   end
 
