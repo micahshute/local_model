@@ -1,9 +1,5 @@
 # LocalModel
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/local_model`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -21,6 +17,31 @@ Or install it yourself as:
     $ gem install local_model
 
 ## Usage
+
+Use the generator:
+
+`bundle add local_model`
+`bundle exec local_model --namespace DesiredNamespace` 
+Note: `--namespace` is optional and will default to `InMemory`
+This creates a rails initializer which sets some config options,
+and a `DataAccessor` class which you can use to switch between your `LocalModel` objects and your `ActiveRecord` objects.
+
+Recommend adding 
+
+`config/application.rb`
+```ruby
+config.autoload_paths << config.root.join('lib')
+```
+
+so you get all of these files.
+
+You can set an environment variable `USE_LOCAL_MODELS` to `true` or `false` to globally decide what to use.
+
+You also now can use a rake task to generate your `LocalModel` models:
+`rake local_model:create_model\[User\]`
+(The `\`s should only be necessary in zsh, not bash)
+
+OR, you can manually: 
 
 Create your schema:
 
