@@ -24,7 +24,6 @@ class LocalModel::PluralizedWords
     "moves" => "move",
     "groves" => "grove",
     "stoves" => "stove",
-    "beliefs" => "belief"
   }
 
    IRREGULAR_PLURALIZED_WORDS = {
