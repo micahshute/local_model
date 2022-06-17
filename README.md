@@ -20,13 +20,17 @@ Or install it yourself as:
 
 Use the generator:
 
-`bundle add local_model`
-`bundle exec local_model --namespace DesiredNamespace` 
+```bash
+bundle add local_model
+```
+```
+bundle exec local_model --namespace DesiredNamespace
+``` 
 Note: `--namespace` is optional and will default to `InMemory`
 This creates a rails initializer which sets some config options,
 and a `DataAccessor` class which you can use to switch between your `LocalModel` objects and your `ActiveRecord` objects.
 
-Recommend adding 
+Recommend adding: 
 
 `config/application.rb`
 ```ruby
