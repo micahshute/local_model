@@ -14,6 +14,7 @@ require_relative './local_model/helpers/functions'
 require_relative './local_model/helpers/pluralized_words'
 require_relative './local_model/model'
 require_relative './local_model/csv'
+require_relative './local_model/generators/initialize'
 
 module LocalModel
   class Error < StandardError; end

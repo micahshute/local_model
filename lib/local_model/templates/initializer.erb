@@ -1,0 +1,7 @@
+module <%= @namespace_classname %>
+    LocalModel.config do |c|
+        c.path = "./tmp/#{ENV['RAILS_ENV'] || 'development'}"
+        c.namespace = "<%= @namespace_classname %>"
+        c.cleanup_on_start = false
+    end
+end

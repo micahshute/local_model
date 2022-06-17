@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'local_model'
+
+LocalModel::Generators::Initialize.start
