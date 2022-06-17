@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    local_model (0.1.10)
+    local_model (0.1.12)
 
 GEM
   remote: https://rubygems.org/
@@ -31,6 +31,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-support (3.10.2)
+    thor (1.2.1)
 
 PLATFORMS
   x86_64-linux
@@ -42,6 +43,7 @@ DEPENDENCIES
   pry (~> 0.14.1)
   rake (~> 13.0)
   rspec (~> 3.10)
+  thor (~> 1.2)
 
 BUNDLED WITH
-   2.2.17
+   2.3.14

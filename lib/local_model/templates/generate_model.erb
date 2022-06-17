@@ -1,0 +1,20 @@
+
+namespace :local_model do 
+
+    desc "Generate LocalModel model" 
+    task :create_model, [:klass_name] => :environment do |_t, args|
+        klass_name = args[:klass_name]
+        model_code = <<~RUBY
+        class <%= @namespace_classname %>::#{klass_name} < LocalModel::CSV
+            schema do |t|
+
+            end
+        end
+        RUBY
+
+        dir = Rails.root.join('lib', '<%= @class_namespace_snake%>')
+        Dir.mkdir(dir) unless File.exists?(dir)
+        filename = "#{dir}/#{klass_name.underscore}.rb"
+        File.open(filename, 'w')  { |f| f.write(model_code) }
+    end
+end

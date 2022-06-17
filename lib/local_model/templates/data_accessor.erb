@@ -1,0 +1,61 @@
+module DataAccessor
+    class Base
+        class Accessors
+            LOCAL = :local
+            ACTIVE_RECORD = :active_record
+
+            NAMESPACES = {
+                LOCAL => <%= @namespace_classname %>,
+                ACTIVE_RECORD => Object
+            }
+
+        end
+
+        @@strategy = ENV["USE_LOCAL_MODELS"] ? Accessors::LOCAL : Accessors::ACTIVE_RECORD
+        @@exceptions = Set.new([])
+
+        def self.set_strategy(strat)
+            if strat.to_sym == :local
+                @@strategy = Accessors::LOCAL
+            else
+                @@strategy = Accessors::ACTIVE_RECORD
+            end
+        end
+
+        def self.klass(klass_name)
+            namespace = get_namespace_for(klass_name)
+            namespaced_klass_name = "#{namespace}::#{klass_name.to_s}" 
+            namespaced_klass = Object.const_get(namespaced_klass_name)
+        end
+        private_class_method :klass
+
+        def self.get_namespace
+            Accessors::NAMESPACES[@@strategy]
+        end
+        private_class_method :get_namespace
+
+        def self.get_namespace_for(klass)
+            exception_strategy = @@strategy == Accessors::ACTIVE_RECORD ? Accessors::LOCAL : Accessors::ACTIVE_RECORD
+            exception_namespace = Accessors::NAMESPACES[exception_strategy]
+            if @@exceptions.include?(klass.to_s.to_sym) 
+                exception_namespace
+            else
+                get_namespace
+            end
+        end
+        private_class_method :get_namespace_for
+
+        def self.set_exceptions(exceptions)
+            @@exceptions = Set.new(exceptions.map(&:to_sym))
+        end
+
+        # Example - find user
+        # def self.find_user(id)
+        #    ref = klass(:User)
+        #    ref.find(id)
+        # end
+        # private_class_method :find_user
+
+        # MARK: PUBLIC GETTERS
+    end
+end

@@ -5,9 +5,12 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
-desc "run a console"
-task :console do
-  require 'pry'
+desc "environment"
+task :environment do 
   require_relative './lib/local_model.rb'
-  binding.pry
+end
+
+desc "run file generator"
+task :generate => :environment do 
+  LocalModel::Generator.new.invoke_all
 end
