@@ -90,6 +90,16 @@ RSpec.describe LocalModel::CSV do
         end
     end
 
+    describe "negative number bug test" do 
+        let(:test_user) { User.create(name: "Unique", fav_number: -0.312)}
+
+        it "loads negative floats" do 
+            test_user
+            user = User.find_by(name: "Unique")
+            expect(user.fav_number).to eq -0.312
+        end
+    end
+
     describe ".new" do
         let(:user2) { User.new(name: "Peter Blood", age: 35) }
 
