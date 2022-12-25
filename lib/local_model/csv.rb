@@ -37,6 +37,10 @@ class LocalModel::CSV < LocalModel::Model
       schema_data
     end
 
+    self.define_method :schema_defaults do 
+      builder.defaults
+    end
+
     if !File.file?(self.storage_path)
       CSV.open(self.storage_path, 'wb') do |csv|
         csv << cols.map(&:to_s)
@@ -63,7 +67,7 @@ class LocalModel::CSV < LocalModel::Model
   end
 
   def self.where(**args)
-    all_records do |row|
+    arr = all_records do |row|
       found = true
       args.each do |k,v|
         if row[k] != v
@@ -73,6 +77,12 @@ class LocalModel::CSV < LocalModel::Model
       end
       found
     end.map{|r| new_from_record(r) }
+    LocalModel::Collection.create_from(
+      array: arr,
+      for_model: self,
+      for_collection_class: nil,
+      add_to_collection_proc: ->(a,b) { raise NoMethodError.new("Cannot add to this collection") }
+    )
   end
 
   def self.find_by(**args)
@@ -108,17 +118,21 @@ class LocalModel::CSV < LocalModel::Model
   end
 
   def self.find(id)
-    return self.find_by(id: id)
-  end
-
-  def self.find!(id)
-    found_record = find(id)
+    found_record = self.find_by(id: id)
     if !found_record
       raise LocalModel::RecordNotFound.new
     else
       found_record
     end
   end
+
+  def self.find_or_create_by(**args)
+    found_obj = find_by(**args)
+    return found_obj if found_obj
+    create(**args)
+  end
+
+  # TODO: Move necessary methods to model.rb
 
   def self.create(**args)
     inst = new(**args)
@@ -133,6 +147,9 @@ class LocalModel::CSV < LocalModel::Model
   end
 
   def initialize(**args)
+    self.schema_defaults.each do |property, value|
+      self.send("#{property}=", value)
+    end
     args.each do |k,v|
       self.send("#{k}=", v)
     end
@@ -145,7 +162,7 @@ class LocalModel::CSV < LocalModel::Model
   
   def reload
     raise LocalModel::RecordNotFound if !self.id
-    self.class.find!(self.id)
+    self.class.find(self.id)
   end
 
   def destroy

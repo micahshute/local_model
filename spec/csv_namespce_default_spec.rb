@@ -125,9 +125,8 @@ RSpec.describe LocalModel::CSV do
             expect(u.id).to eq 17
         end
 
-        it 'returns nil if the object is not found' do 
-            u = LocalModel::Sbx::User.find(200)
-            expect(u).to be nil
+        it 'throws an error when the user is not found' do 
+            expect { LocalModel::Sbx::User.find(200) }.to raise_error LocalModel::RecordNotFound
         end
     end
 
@@ -150,17 +149,17 @@ RSpec.describe LocalModel::CSV do
         end
     end
 
-    describe '.find!' do
+    describe '.find' do
         let!(:griffin) do 
             LocalModel::Sbx::Dog.create(name: "Griffin", age: 3)
         end
 
         it "finds an object by its id" do 
-            expect(LocalModel::Sbx::Dog.find!(1).name).to eq 'Griffin'
+            expect(LocalModel::Sbx::Dog.find(1).name).to eq 'Griffin'
         end
 
         it 'throws an error when the object does not exist' do 
-            expect{LocalModel::Sbx::Dog.find!(100)}.to raise_error(LocalModel::RecordNotFound)
+            expect{LocalModel::Sbx::Dog.find(100)}.to raise_error(LocalModel::RecordNotFound)
         end 
     end
 

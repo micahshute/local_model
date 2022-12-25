@@ -33,7 +33,7 @@ class LocalModel::Model
         association_class = Object.const_get(association_class_name)
       end
       id = self.send(keyname)
-      association_class.find(id)
+      association_class.find_by(id: id)
     end
 
     define_method "#{association}=" do |association_obj|
@@ -91,7 +91,7 @@ class LocalModel::Model
       define_method association do 
         association_class = Object.const_get(association_classname)
         LocalModel::Collection.create_from(
-          array: self.send(through).map{|through_obj| association_class.find(through_obj.send(belongs_to_id_sym))},
+          array: self.send(through).map{|through_obj| association_class.find_by(id: through_obj.send(belongs_to_id_sym))},
           for_model: self,
           for_collection_class: association_class,
           add_to_collection_proc: add_to_collection
@@ -192,37 +192,47 @@ class LocalModel::Model
   class SchemaBuilder
 
     attr_reader :schema
+    attr_reader :defaults
 
     def initialize(model)
       @model = model
       @schema = { id: :integer }
       @model.attr_accessor :id
+      @defaults = {}
     end
 
-    def string(name)
+    def set_default(name, default)
+      @defaults[name] = default if !default.nil?
+    end
+
+    def string(name, default: nil)
       @model.attr_accessor name
       @schema[name] = :string
+      set_default(name, default)
     end
 
-    def integer(name)
+    def integer(name, default: nil)
       @model.attr_accessor name
       @schema[name] = :integer
+      set_default(name, default)
     end
 
-    def boolean(name)
+    def boolean(name, default: nil)
       @model.attr_accessor name
       @schema[name] = :boolean
+      set_default(name, default)
     end
 
-    def float(name)
+    def float(name, default: nil)
       @model.attr_accessor name
       @schema[name] = :float
+      set_default(name, default)
     end
 
-    def datetime(name)
+    def datetime(name, default: nil)
       @model.attr_accessor name
       @schema[name] = :datetime
+      set_default(name, default)
     end
-
   end
 end

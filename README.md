@@ -41,6 +41,7 @@ so you get all of these files.
 
 You can set an environment variable `USE_LOCAL_MODELS` to `true` or `false` to globally decide what to use.
 
+
 You also now can use a rake task to generate your `LocalModel` models:
 `rake local_model:create_model\[User\]`
 (The `\`s should only be necessary in zsh, not bash)

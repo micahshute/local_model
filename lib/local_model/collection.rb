@@ -26,7 +26,7 @@ class LocalModel::Collection < Array
     end
 
     def where(**args)
-        self.filter do |el|
+        arr = self.filter do |el|
             found = true
             args.each do |k,v|
                 if el.send(k.to_s) != v
@@ -36,6 +36,24 @@ class LocalModel::Collection < Array
             end
             found
         end
+        self.class.create_from(
+            array: arr,
+            for_model: model,
+            for_collection_class: nil,
+            add_to_collection_proc: ->(a,b) { raise NoMethodError.new("Cannot add to this collection") }
+        )
+    end
+
+    def find_by(**args)
+        where(**args).first
+    end
+
+    def first
+        self[0]
+    end
+
+    def last
+        self[-1]
     end
 
 end
