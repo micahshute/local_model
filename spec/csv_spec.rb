@@ -9,6 +9,7 @@ RSpec.describe LocalModel::CSV do
             schema do |t|
                 t.string :name
                 t.integer :age
+                t.float :fav_number
             end
 
             has_many :dogs
@@ -79,11 +80,12 @@ RSpec.describe LocalModel::CSV do
     end
 
     describe ".create" do 
-        let(:user1) { User.create(name: "A Person", age: 24) }
+        let(:user1) { User.create(name: "A Person", age: 24, fav_number: -0.123) }
         it "creates an object and persists it" do 
             expect(user1.name).to eq "A Person"
             expect(user1.id).not_to be nil
             expect(user1.age).to eq 24
+            expect(user1.fav_number).to eq -0.123
             expect(User.first.id).to eq user1.id
         end
     end
